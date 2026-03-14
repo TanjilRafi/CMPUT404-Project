@@ -1,0 +1,220 @@
+<!--
+    Public profile page for an author in the distributed social network.
+    Displays identity information and the author's visible posts.
+-->
+{% extends "base.html" %}
+
+{% block title %}
+    {{ author.displayName }} - Profile
+{% endblock %}
+
+{% block page %}
+
+<div class="main-content profile-page">
+
+<div class="profile-layout">
+
+    <!-- PROFILE CARD -->
+    <aside class="profile-sidebar">
+
+        <div class="profile-card">
+
+            <!-- Profile Header -->
+            <div class="profile-header">
+
+                {% if author.profileImage %}
+                    <img src="{{ author.profileImage }}" alt="Profile Image" class="profile-image">
+                {% endif %}
+
+                <h1>{{ author.displayName }}</h1>
+
+            </div>
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div class="profile-actions">
+
+            {% if is_user %}
+
+                <a class="profile-btn" href="{% url 'edit_profile' id=author.id %}">
+                    Edit Profile
+                </a>
+
+                <a class="profile-btn" href="{% url 'manage_profile' id=author.id %}">
+                    Manage Profile
+                </a>
+
+                <a class="profile-btn" href="{% url 'create_post' id=author.id %}">
+                    Create Post
+                </a>
+
+            {% else %}
+
+                {% if authenticated %}
+
+                    {% if following_status == "FOLLOWING" %}
+
+                        <form method="post" action="{% url 'unfollow' author.id %}">
+                            {% csrf_token %}
+                            <button type="submit">Unfollow</button>
+                        </form>
+
+                    {% elif following_status == "REQUESTED" %}
+
+                        <button disabled>Requested</button>
+
+                    {% else %}
+
+                        <form method="post" action="{% url 'follow' author.id %}">
+                            {% csrf_token %}
+                            <button type="submit">Follow</button>
+                        </form>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <form method="get" action="{% url 'signup' %}">
+                        <button type="submit">{{ follow_button_label }}</button>
+                    </form>
+
+                {% endif %}
+
+            {% endif %}
+
+            </div>
+
+
+            <!-- AUTHOR INFO -->
+
+            <div class="info">
+
+                {% if author.description %}
+                    <p><strong>Description</strong></p>
+                    <div class="bio-block">
+                        {{ author.description }}
+                    </div>
+                {% else %}
+                    <p class="text-secondary"><em>No description added yet.</em></p>
+                {% endif %}
+
+                {% if author.github %}
+                    <p>
+                        <strong>GitHub</strong><br>
+                        <a href="{{ author.github }}" target="_blank">
+                            {{ author.github }}
+                        </a>
+                    </p>
+                {% endif %}
+
+                <p>
+                    <strong>Hosted on</strong><br>
+                    {{ author.host }}
+                </p>
+
+                <p>
+                    <strong>Unique ID</strong><br>
+                    <span class="uuid">{{ author.id }}</span>
+                </p>
+
+                <p>
+                    <strong>Shareable Profile Link</strong><br>
+                    <a href="{{ request.build_absolute_uri }}" target="_blank">
+                        {{ request.build_absolute_uri }}
+                    </a>
+                </p>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <div class="profile-stats">
+
+                <div>
+                    <strong>{{ posts|length }}</strong>
+                    Posts
+                </div>
+
+                {% if is_user %}
+
+                    <a href="{% url 'my_followers' %}">
+                        <strong>{{ followers_count }}</strong>
+                        Followers
+                    </a>
+
+                    <a href="{% url 'my_following' %}">
+                        <strong>{{ following_count }}</strong>
+                        Following
+                    </a>
+
+                    <a href="{% url 'my_friends' %}">
+                        <strong>{{ friends_count }}</strong>
+                        Friends
+                    </a>
+
+                {% else %}
+
+                    <a href="{% url 'followers' id=author.id %}">
+                        <strong>{{ followers_count }}</strong>
+                        Followers
+                    </a>
+
+                    <a href="{% url 'following' id=author.id %}">
+                        <strong>{{ following_count }}</strong>
+                        Following
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- POSTS FEED -->
+
+    <section class="profile-feed">
+
+        <h2>Posts</h2>
+
+        <div class="post-list">
+
+            {% if posts %}
+
+                {% for post in posts %}
+
+                <div class="post-card">
+
+                    <div class="post-card-title">
+                        <a href="{% url 'post_detail' id=author.id post_id=post.id %}">
+                            {{ post.title }}
+                        </a>
+                    </div>
+
+                    <div class="post-card-date">
+                        {{ post.created_at|date:"F j, Y" }}
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p class="empty-state">No posts available.</p>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+</div>
+
+{% endblock %}

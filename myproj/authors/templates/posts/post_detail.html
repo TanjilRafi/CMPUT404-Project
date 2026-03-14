@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}
+{{ post.title }}
+{%endblock%}
+
+{% block css %}
+<style>
+    .page { 
+        margin: 0 auto; 
+        padding: 60px; 
+    }
+    img {
+        width: 100%;
+    }
+</style>
+{%endblock%}
+
+{% block page %}
+<div class="page" style="color: var(--accent-light);">
+    <h1 style="color: var(--text-primary); font-size: 3rem;">{{ post.title }}</h1>
+
+    <p>
+        <strong>Author:</strong> {{ author.displayName }}
+    </p>
+
+    <p>
+        <strong>Created:</strong> {{ post.created_at }}
+    </p>
+
+    <p>
+        <strong>Visibility:</strong> {{ post.visibility }}
+    </p>
+
+    {% if user.is_authenticated and user == author.user %}
+    <!-- Links for the logged-in author only -->
+    <p>
+      <a class='link-as-button' id="edit-button-posts" href="{% url 'edit_post' author.id post.id %}">Edit</a>
+      <a class='link-as-button' id="delete-button-posts" href="{% url 'delete_post' author.id post.id %}">Delete</a>
+
+    </p>
+    {% endif %}
+
+    <!-- CONTENT -->
+    <div style="color: var(--text-primary);">
+        {% if post.type == "IMAGE" %}
+            <img src="data:{{ post.content_type }};base64,{{ post.content }}" alt="{{post.title}}">
+        {% else %}
+            {% if post.type == 'COMMONMARK' %}
+                <div class="post-detail-card">{{ post.content|safe }}</div>
+            {% else %}
+                <p class="post-detail-card">{{ post.content|linebreaksbr }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- likes -->
+    <div class="mt-3">
+        {% if likes_count == 1 %}
+            <span>1 person liked this</span>
+        {% elif likes_count > 1 %}
+            <span>{{ likes_count }} people liked this</span>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'like_post' author.id post.id %}" class="inline-like">
+                {% csrf_token %}
+                <button type="submit">
+                    {% if user_liked %}unlike{% else %}like{% endif %}
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- comments -->
+    <section>
+        <h2 style="padding-top:3em">Comments ({{ comments|length }})</h2>
+
+        {% for comment in comments %}
+            <div class="post-detail-card-no-shadow">
+                <strong>{{ comment.author.displayName }}</strong>
+                <span style="color: grey; font-size: 0.85em; margin-left: 8px;">{{ comment.published|date:"M d, Y" }}</span>
+                <p>{{ comment.content }}</p>
+
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'like_comment' author.id post.id comment.id %}" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit">
+                            {% if comment.id in liked_comment_ids %}unlike{% else %}like{% endif %}
+                            {{ comment.likes_count }}
+                        </button>
+                    </form>
+                {% else %}
+                    <span>♡ {{ comment.likes_count }}</span>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p style="color: grey;">No comments yet. Be the first!</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'post_comment' author.id post.id %}">
+                {% csrf_token %}
+                <textarea name="content" id="comment-input-post-detail" rows="3" placeholder="Write a comment…" required></textarea>
+                <br>
+                <button type="submit" style="margin-top: 8px;">Post Comment</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+        {% endif %}
+    </section>
+</div>
+{%endblock%}

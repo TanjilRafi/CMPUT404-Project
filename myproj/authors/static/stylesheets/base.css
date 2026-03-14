@@ -1,0 +1,9 @@
+/* https://www.geeksforgeeks.org/css/how-to-create-a-split-navigation-bar-using-css/ [2026-02-27] */
+body { font-family: Arial, sans-serif; margin: 30px auto auto; }
+nav { position: absolute; top: 0; left: 0; right: 0; height: 30px; background: darkorchid; display: flex; justify-content: space-between;}
+nav span.right { display: flex; justify-content: flex-end;}
+nav span { width: fit-content; height: 100%; display: inline-flex; vertical-align: middle;}
+nav span a { padding: 0 1ex; text-decoration: none; color: white; font-size: medium; }
+nav span button { padding: 0 0; height: 100%; border: 0; background: darkorchid; color: white; font-size: medium; }
+nav span button[type="submit"] { cursor:pointer; padding: 0 1ex; }
+nav span button:hover { background: purple;}
