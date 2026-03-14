@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}
+Edit Post
+{%endblock%}
+
+{% block page %}
+<div class="main-content create-edit-page">
+    <h1>Edit Post</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>Type: {{post.type}}</p>
+        <label for="visibility_input">Visibility:</label><br>
+        <select name="visibility" id="visibility_input">
+        {% for value, label in visibility_choices %}
+            <option value="{{ value }}" {% if value == post.visibility %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+        </select>
+        <br>
+        <label for="title">Title:</label><br>
+        <input type="text" name="title" id="title" value="{{ post.title }}"><br>
+        
+        {% if post.type == "IMAGE" %}
+            <input type="file" id="image_input" accept="image/*" name="img"><br>
+        {% else %}
+            <label for="content">Content:</label><br>
+            <textarea name="content" id="content" rows="5">{{ post.content }}</textarea><br>
+        {% endif %}
+
+        <input type="submit" value="Save Changes">
+    </form>
+
+</div>
+{%endblock%}

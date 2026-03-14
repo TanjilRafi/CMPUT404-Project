@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OrchidNet{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'stylesheets/app.css' %}">
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <!-- Vertical left sidebar -->
+    <div class="sidebar">
+        <!-- Logo + Name (both clickable to home) -->
+        <div class="brand">
+            <a href="{% url 'home' %}" class="logo-text">OrchidNet</a>
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo-image">
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+            {% if user.is_authenticated and user.author %}
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'follow_requests' %}">Follow Requests</a>
+                <a href="{% url 'author_profile' user.author.id %}">My Profile</a>
+                <a href="{% url 'authors_list' %}">Authors List</a>
+                {% comment %}<a href="{% url 'stream' %}">Stream</a>{% endcomment %}
+                <a href="{% url 'create_post' id=user.author.id %}">Add Post</a>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <main class="main-content">
+        {% block page %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

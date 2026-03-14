@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}OrchidNet - Home{% endblock %}
+
+{% block css %}
+    <style>
+        img { max-width: 100%; height: auto; border-radius: 8px; }
+    </style>
+{% endblock %}
+
+{% block page %}
+<div class="main-content stream-page">  <!-- Reuse stream-page class for consistent dark styling -->
+    <h1>My Stream</h1>
+
+    {% if posts %}
+        {% for post in posts %}
+            <div class="post card">  <!-- Add .card class from app.css for dark style -->
+                <div class="post-header">
+                    <span class="post-author">
+                        <a href="{% url 'author_profile' id=post.author.id %}">{{ post.author.displayName }}</a>
+                    </span>
+                    <span class="post-date">{{ post.created_at|date:"M d, Y • H:i" }}</span>
+                </div>
+
+                <h3 class="post-title">
+                    <a href="{% url 'post_detail' id=post.author.id post_id=post.id %}">
+                        {{ post.title }}
+                    </a>
+                </h3>
+
+                <div class="post-content">
+                    {% if post.type == 'IMAGE' %}
+                        <img src="data:{{ post.content_type }};base64,{{ post.content }}" 
+                             alt="{{ post.title }}" 
+                             style="max-width: 100%; height: auto; border-radius: 8px;">
+                    {% else %}
+                        {% if post.type == 'COMMONMARK' %}
+                            <div>{{ post.content|safe }}</div>
+                        {% else %}
+                            {{ post.content|linebreaksbr }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary); font-style: italic;">
+                    Visibility: {{ post.get_visibility_display }}
+                </p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No posts in your stream yet. Create one or follow some authors!</p>
+    {% endif %}   
+
+</div>
+{% endblock %}

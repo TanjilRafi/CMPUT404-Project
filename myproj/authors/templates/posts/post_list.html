@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Posts by {{ author.displayName }}
+{% endblock %}
+
+{% block page %}
+    <div class="main-content post-list-page">
+        <h1>Posts by {{ author.displayName }}</h1>
+
+        {% if user.is_authenticated and user.author == author %}
+            <a href="{% url 'create_post' id=author.id %}" class="create-post-btn">
+                Create New Post
+            </a>
+        {% endif %}
+
+        {% if posts %}
+            <div class="post-list">
+                {% for post in posts %}
+                    <div class="post-item">
+                        <div class="post-title">
+                            <a href="{% url 'post_detail' author.id post.id %}">
+                                {{ post.title }}
+                            </a>
+                        </div>
+
+                        <div class="post-content">
+                            {% if post.type == 'IMAGE' %}
+                                <img src="{% url 'api_entry_image' author.id post.id %}" 
+                                     alt="{{ post.title }}" 
+                                     class="post-image">
+                            {% elif post.type == 'COMMONMARK' %}
+                                <div class="post-content-markdown">{{ post.content|safe }}</div>
+                            {% else %}
+                                <p class="post-content-text">{{ post.content|linebreaksbr }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if user.is_authenticated and user.author == author %}
+                            <div class="post-edit-links">
+                                <a href="{% url 'edit_post' author.id post.id %}">Edit</a>
+                                <a href="{% url 'delete_post' author.id post.id %}">Delete</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">No posts yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

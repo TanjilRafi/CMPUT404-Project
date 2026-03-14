@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login - OrchidNet{% endblock %}
+
+{% block page %}
+
+<div class="main-content form-card">
+    <h1>Log In</h1>
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <!-- Username field -->
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" required><br><br>
+
+        <!-- Password field
+            References: 
+                -https://www.w3schools.com/howto/howto_js_toggle_password.asp 
+                -https://dev.to/wizdomtek/how-to-create-an-advanced-show-password-feature-using-html-css-and-javascript-ndn
+        -->
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required><br><br>
+        <!-- Element to toggle between password visibility -->
+        <label class="show-password">
+            <input type="checkbox" onclick="togglePassword()"> Show Password
+        </label>
+
+        <!-- Login button -->
+        <br><br><button type="submit" class="primary-btn">Login</button>
+
+        <!-- User validation -->
+        {% if form.errors %}
+            <p class="error-text">Invalid username or password</p>
+        {% endif %}
+    </form>
+
+    <!-- Sign up option -->
+    <p class="form-footer">
+        Don't have an account?
+        <a href="{% url 'signup' %}">Sign Up</a>
+    </p>
+</div>
+
+{% endblock %}
+
+<!-- Function for showing password -->
+{% block scripts %}
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+}
+</script>
+{% endblock %}
