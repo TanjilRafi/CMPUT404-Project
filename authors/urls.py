@@ -61,7 +61,7 @@ urlpatterns = [
     
     # ────────────────────────────────────────────────────────────────
     # API Endpoints
-    # ────────────────────────────────────────────────────────────────
+    # ───────────────────────────────────────────────────────────────
     path('api/authors/', views.api_authors_list, name='api_authors_list'),
     
     # GET single author
@@ -95,6 +95,16 @@ urlpatterns = [
 
     # GET image entry file fqid ver.
     path('api/entries/<path:fqid>/image', views.entry_image_fqid, name='api_entry_image_fqid'),
+
+    # Comments API
+    path('api/authors/<uuid:author_id>/entries/<uuid:post_id>/comments/', views.api_entry_comments, name='api_entry_comments'),
+    path('api/entries/<path:entry_fqid>/comments/', views.api_entry_comments_fqid, name='api_entry_comments_fqid'),
+    path('api/authors/<uuid:author_id>/entries/<uuid:post_id>/comments/<path:comment_fqid>/', views.api_entry_comment_detail_fqid, name='api_entry_comment_detail_fqid'),
+
+    # Commented API
+    path('api/authors/<uuid:author_id>/commented/', views.api_author_commented, name='api_author_commented'),
+    path('api/authors/<uuid:author_id>/commented/<uuid:comment_id>/', views.api_author_commented_detail, name='api_author_commented_detail'),
+    path('api/commented/<path:comment_fqid>/', views.api_commented_detail_fqid, name='api_commented_detail_fqid'),
 
     # Streams
     path('stream/', views.stream, name='stream'),
