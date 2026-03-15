@@ -443,19 +443,28 @@ def edit_post(request, id, post_id):
 
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
-        content = request.POST.get('content', '').strip()
+        type = request.POST.get('type')
+        if type == Post.Type.TEXT:
+            content = request.POST.get('content', '').strip()
+            content_type = "text/plain"
+        elif type == Post.Type.COMMONMARK:
+            content = request.POST.get('content', '').strip()
+            content_type = "text/markdown"
+        elif type == Post.Type.IMAGE:
+            if request.FILES:
+                content_type = request.FILES['img'].content_type
+                content = base64.b64encode(request.FILES['img'].read()).decode('utf-8')
+            elif type == post.type:
+                content_type = post.content_type
+                content = post.content
+            else: 
+                content = None
         new_visibility = request.POST.get('visibility', post.visibility)
-
-        if post.type == Post.Type.IMAGE:
-            image = request.FILES['img']
-            content_type = image.content_type
-            content = base64.b64encode(image.read()).decode('utf-8')
-        else:
-            content_type = post.content_type
 
         if title and content:
             old_visibility = post.visibility
             post.title = title
+            post.type = type
             post.content = content
             post.content_type = content_type
             post.visibility = new_visibility
@@ -478,7 +487,7 @@ def edit_post(request, id, post_id):
 
             return redirect('post_detail', author.id, post.id)
 
-    return render(request, 'posts/edit_post.html', {'author': author, 'post': post, 'visibility_choices': Post.Visibility.choices})
+    return render(request, 'posts/edit_post.html', {'author': author, 'post': post, 'visibility_choices': Post.Visibility.choices, "type_choices": Post.Type.choices})
 
 
 @login_required
@@ -1378,6 +1387,75 @@ def entry_image_fqid(request, fqid):
         return HttpResponse(img, content_type=post.content_type)
     else:
         return JsonResponse("This post doesn't have an image file", status=404)
+
+
+
+def _comment_to_api(comment: Comment):
+    return {
+        "type": "comment",
+        "id": f"{comment.author.host}authors/{comment.author.id}/commented/{comment.id}",
+        "author": {
+            "type": "author",
+            "id": f"{comment.author.host}authors/{comment.author.id}",
+            "displayName": comment.author.displayName,
+            "host": comment.author.host,
+        },
+        "published": comment.published.isoformat(),
+        "contentType": comment.contentType,
+        "comment": comment.content,
+        "entry": comment.post.api_url,
+    }
+
+
+def _comment_id_from_fqid(comment_fqid: str):
+    decoded = urllib.parse.unquote_plus(comment_fqid).rstrip("/")
+    comment_id = decoded.split("/")[-1]
+    return comment_id
+
+
+@api_view(["GET"])
+def api_entry_comments(request, author_id, post_id):
+    post = get_object_or_404(Post, id=post_id, author_id=author_id)
+    comments = Comment.objects.filter(post=post).select_related("author").order_by("published")
+    return JsonResponse({"type": "comments", "comments": [_comment_to_api(c) for c in comments]})
+
+
+@api_view(["GET"])
+def api_entry_comments_fqid(request, entry_fqid):
+    entry_api_url = urllib.parse.unquote_plus(entry_fqid).rstrip("/")
+    post = get_object_or_404(Post, api_url=entry_api_url)
+    comments = Comment.objects.filter(post=post).select_related("author").order_by("published")
+    return JsonResponse({"type": "comments", "comments": [_comment_to_api(c) for c in comments]})
+
+
+@api_view(["GET"])
+def api_entry_comment_detail_fqid(request, author_id, post_id, comment_fqid):
+    post = get_object_or_404(Post, id=post_id, author_id=author_id)
+    comment_id = _comment_id_from_fqid(comment_fqid)
+    comment = get_object_or_404(Comment, id=comment_id, post=post)
+    return JsonResponse(_comment_to_api(comment))
+
+
+@api_view(["GET"])
+def api_author_commented(request, author_id):
+    author = get_object_or_404(Author, id=author_id)
+    comments = Comment.objects.filter(author=author).select_related("post", "author").order_by("-published")
+    return JsonResponse({"type": "comments", "comments": [_comment_to_api(c) for c in comments]})
+
+
+@api_view(["GET"])
+def api_author_commented_detail(request, author_id, comment_id):
+    author = get_object_or_404(Author, id=author_id)
+    comment = get_object_or_404(Comment, id=comment_id, author=author)
+    return JsonResponse(_comment_to_api(comment))
+
+
+@api_view(["GET"])
+def api_commented_detail_fqid(request, comment_fqid):
+    comment_id = _comment_id_from_fqid(comment_fqid)
+    comment = get_object_or_404(Comment, id=comment_id)
+    return JsonResponse(_comment_to_api(comment))
+
 
 
 @extend_schema(
