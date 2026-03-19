@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up - OrchidNet{% endblock %}
+
+{% block page %}
+
+<div class="main-content form-card">
+    <h1>Create Account</h1>
+
+    <form action="{% url 'signup' %}" method="post">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" required>
+        <p class="error-text">{{ form.errors.username }}</p>
+
+        <!-- Password -->
+        <label for="password1">Password</label>
+        <input type="password" name="password1" id="password1" required>
+        <p class="error-text">{{ form.errors.password1 }}</p>
+
+        <!-- Confirm Password -->
+        <label for="password2">Confirm Password</label>
+        <input type="password" name="password2" id="password2" required>
+        <p class="error-text">{{ form.errors.password2 }}</p>
+
+        <!-- Show Password -->
+        <label class="show-password">
+            <input type="checkbox" onclick="togglePasswords()"> Show Password
+        </label>
+
+        <br><br>
+        <button type="submit" class="primary-btn">Sign Up</button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswords() {
+    const p1 = document.getElementById("password1");
+    const p2 = document.getElementById("password2");
+
+    const type = p1.type === "password" ? "text" : "password";
+
+    p1.type = type;
+    p2.type = type;
+}
+</script>
+{% endblock %}
