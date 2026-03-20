@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+<title>Follow Requests</title>
+{% block page %}
+<div class="main-content requests-page">
+<h1>Follow Requests</h1>
+{% if follow_requests %}
+    {% for author in follow_requests  %}
+        <div class="card">
+            {% comment %} <img src="{{ author.profileImage }}" alt="picture" style="width: 40px; height: 4px; border-radius: 2px;"> {% endcomment %}
+            <h3 class="name"><a href="{% url 'author_profile' id=author.id %}">{{author.displayName}}</a></h3>
+            <form method="post" action="{% url 'follow_requests' %}">
+                {% csrf_token %}
+                <input hidden type="text" name="id" value="{{ author.id }}">
+                <button type="submit" name="action" value="accept">Accept</button>
+                <button type="submit" name="action" value="decline">Decline</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+<p>No pending requests.</p>
+{% endif %}
+</div>
+{% endblock %}
