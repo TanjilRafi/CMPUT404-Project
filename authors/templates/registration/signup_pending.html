@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Signup Pending - OrchidNet{% endblock %}
+
+{% block page %}
+
+<div class="form-card">
+    <h1>Signup Pending Approval</h1>
+
+    <p>Thank you for signing up for <strong>OrchidNet</strong>!</p>
+
+    <p>
+        An administrator will review your request soon.
+        Once approved, you will be able to log in and start using the platform.
+    </p>
+
+    <a href="{% url 'login' %}" class="primary-btn">Back to Login</a>
+</div>
+
+{% endblock %}

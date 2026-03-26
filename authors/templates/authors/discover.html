@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}OrchidNet - Discover{% endblock %}
+
+{% block page %}
+<div class="main-content">
+    <h1>Discover Remote Authors</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Explore authors from other connected nodes in our federated network.
+    </p>
+
+    {% if remote_authors %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+        {% for author in remote_authors %}
+            <div class="card" style="margin: 0; padding: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    {% if author.profileImage %}
+                        <img src="{{ author.profileImage }}" alt="{{ author.displayName }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-orchid);">
+                    {% else %}
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-primary); border: 2px solid var(--accent-orchid); display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 1.5rem; color: var(--accent-light);">{{ author.displayName|make_list|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div style="overflow: hidden;">
+                        <h3 style="margin: 0; font-size: 1.2rem; color: var(--text-primary); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                            {{ author.displayName }}
+                        </h3>
+                        <small style="color: var(--text-secondary); display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                            Node: {{ author.host }}
+                        </small>
+                    </div>
+                </div>
+                
+                {% if author.github %}
+                    <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                        <a href="{{ author.github }}" target="_blank" style="color: var(--cta-cyan);">🔗 GitHub Profile</a>
+                    </p>
+                {% endif %}
+
+                <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
+                    {% if author.web %}
+                        <a href="{{ author.web }}" target="_blank" class="profile-btn" style="padding: 8px 16px; font-size: 0.85rem; width: 100%; display: block; box-sizing: border-box;">View Original Profile</a>
+                    {% else %}
+                        <a href="{{ author.id }}" target="_blank" class="profile-btn" style="padding: 8px 16px; font-size: 0.85rem; width: 100%; display: block; box-sizing: border-box;">View Original Profile</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No remote authors found.</p>
+        </div>
+    {% endif %}
+
+    <h2 style="margin-top: 60px;">Active Node Connections</h2>
+    <ul>
+        {% for node in nodes %}
+            <li>{{ node.url }}</li>
+        {% empty %}
+            <li style="color: var(--text-secondary); font-style: italic; border: none; background: transparent;">No active connections established via the admin panel.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

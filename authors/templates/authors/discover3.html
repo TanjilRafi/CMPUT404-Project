@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}OrchidNet - Discover{% endblock %}
+
+{% block page %}
+<div class="main-content">
+    <h1>Discover Remote Authors</h1>
+
+    <!-- Active Node Connections -->
+    <h2 style="margin-top: 40px;">Active Node Connections</h2>
+    <ul>
+        {% for node in nodes %}
+            <li>{{ node.url }}</li>
+        {% empty %}
+            <li style="color: var(--text-secondary); font-style: italic; border: none; background: transparent;">
+                No active connections established via the admin panel.
+            </li>
+        {% endfor %}
+    </ul>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Explore authors from other connected nodes in our federated network.
+    </p>
+
+    <!-- FQID Search / Follow Form. Am having trouble with css styling via app.css, will look into later-->
+    <h2 style="margin-top: 40px;">Follow by FQID</h2>
+    <input 
+        type="text" 
+        id="fqid-input" 
+        placeholder="Enter full fqid URL" 
+        style="
+            background: #1a0033;       /* var(--bg-secondary) */
+            color: white;
+            width: 92%;
+            border: 1px solid #4A148C;  /* var(--border) */
+            border-radius: 12px;
+            padding: 1em;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            margin-right: 12px;
+        "
+    >
+    <button id="fqid-follow-btn" style="padding: 8px 12px;">Follow</button>
+    <p id="fqid-feedback" style="color: green; margin-top: 10px;"></p>
+
+    <!-- Remote Authors List -->
+    {% if remote_authors %}
+        <h2 style="margin-top: 40px;">Remote Authors</h2>
+        <ul class="authors-list">
+            {% for author in remote_authors %}
+                <li>
+                    <a href="{% url 'author_profile' id=author.id %}">{{ author.displayName }}</a>
+                    <p><span style="color: var(--text-secondary);">FQID: </span> {{ author.api_url }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state" style="margin-top: 30px;">
+            <p>No remote authors found.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // CSRF setup for Django
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Function to send PUT request to follow a remote author
+    async function followAuthor(fqid) {
+        const authorId = "{{ request.user.author.id }}"; // current logged-in author
+        const encodedFqid = encodeURIComponent(fqid);
+
+        try {
+            const response = await fetch(`/api/authors/${authorId}/following/${encodedFqid}/`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            const feedback = document.getElementById('fqid-feedback');
+
+            if (response.ok) {
+                feedback.style.color = 'green';
+                feedback.textContent = data.message || "Follow request sent successfully!";
+            } else {
+                feedback.style.color = 'red';
+                feedback.textContent = data.error || "Failed to send follow request.";
+            }
+        } catch (err) {
+            const feedback = document.getElementById('fqid-feedback');
+            feedback.style.color = 'red';
+            feedback.textContent = "Error connecting to server: " + err;
+        }
+    }
+
+    // Attach click to search bar button
+    document.getElementById('fqid-follow-btn').addEventListener('click', () => {
+        const fqid = document.getElementById('fqid-input').value.trim();
+        if (fqid) followAuthor(fqid);
+    });
+</script>
+{% endblock %}
