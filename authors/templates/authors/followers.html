@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page %}
+<div class="main-content page">
+    <p><a href="{% url 'author_profile' id=author.id %}">Back to {{ author.displayName }}'s profile</a></p>
+    <h2>{{ title }}</h2>
+
+    {% if followers %}
+        <ul>
+            {% for follower in followers %}
+                <li>
+                    <a href="{% url 'author_profile' id=follower.id %}">
+                        {{ follower.displayName }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No followers yet.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

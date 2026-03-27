@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}OrchidNet - Discover{% endblock %}
+
+{% block page %}
+<div class="main-content">
+    <h1>Discover Remote Authors</h1>
+    <h2 style="margin-top: 60px;">Active Node Connections</h2>
+    <ul>
+        {% for node in nodes %}
+            <li>{{ node.url }}</li>
+        {% empty %}
+            <li style="color: var(--text-secondary); font-style: italic; border: none; background: transparent;">No active connections established via the admin panel.</li>
+        {% endfor %}
+    </ul>
+    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Explore authors from other connected nodes in our federated network.
+    </p>
+    {% if remote_authors %}
+        <ul class='authors-list'>
+            {% for author in remote_authors %}
+                <li>
+                    <a href="{% url 'author_profile' id=author.id %}">
+                        {{ author.displayName }}
+                    </a>
+                    <p>{{author.api_url}}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No remote authors found.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

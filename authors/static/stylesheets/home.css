@@ -1,0 +1,9 @@
+div.page { max-width: 900px; height: 100%; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+h1 { color: #333; }
+.post { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.post-author { font-weight: bold; color: #0066cc; }
+.post-date { color: #666; font-size: 0.9em; }
+.post-content { line-height: 1.6; }
+#add_post {position: fixed; margin: 10px; bottom: 0; right: 0; background: darkorchid; color: white; border: 0; border-radius: 5px;}
+#add_post a { padding: 3ex .5ex; font-size: large; color: white; text-decoration: none; text-align: center; }
